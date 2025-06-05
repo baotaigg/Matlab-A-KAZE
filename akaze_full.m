@@ -1,13 +1,12 @@
 function [keypoints, descriptors, responseMaps] = akaze_full(grayImg)
     if size(grayImg, 3) == 3
-        grayImg = rgb2gray(grayImg);  % 轉灰階
+        grayImg = rgb2gray(grayImg); 
     end
 
 
     gray = im2double(grayImg);
     [H, W] = size(gray);
 
-    %% Step 1: 非線性尺度空間 (Perona-Malik)
     numLevels = 5;
     sigmas = linspace(1.0, 3.0, numLevels);
     responseMaps = cell(numLevels, 1);
@@ -16,7 +15,6 @@ function [keypoints, descriptors, responseMaps] = akaze_full(grayImg)
         responseMaps{i} = perona_malik(gray * 255, iter, 20, 0.2);
     end
 
-    %% Step 2: 計算 Hessian 響應圖
     hessianResp = cell(numLevels, 1);
     for i = 1:numLevels
         L = responseMaps{i};
@@ -26,7 +24,6 @@ function [keypoints, descriptors, responseMaps] = akaze_full(grayImg)
         hessianResp{i} = abs(Lxx .* Lyy - (gradient(Lx, 2)).^2);
     end
 
-    %% Step 3: 特徵點偵測與方向估計
     all_locs = [];
     all_vals = [];
     all_orients = [];
@@ -43,14 +40,12 @@ function [keypoints, descriptors, responseMaps] = akaze_full(grayImg)
         end
     end
 
-    %% Step 4: Top-K 排序
     K = 300;
     [~, sortIdx] = sort(all_vals, 'descend');
     sortIdx = sortIdx(1:min(K, length(sortIdx)));
     keypoints = all_locs(sortIdx, :);
     orientations = all_orients(sortIdx);
 
-    %% Step 5: descriptor（旋轉不變 LDB-style binary patch）
     patchSize = 31;
     gridSize = 4; % 4x4 = 16 cells
     descriptors = zeros(K, gridSize * gridSize);
