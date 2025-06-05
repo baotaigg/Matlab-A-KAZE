@@ -17,8 +17,4 @@ This is a simplified **AKAZE** feature extraction pipeline implemented in MATLAB
 | `akaze_full.m` | Main function for detecting keypoints and computing descriptors |
 | `test.m` | Test main function|
 
-## 🧪 Usage
 
-```matlab
-img = imread('example.jpg');
-[keypoints, descriptors, responseMaps] = akaze_full(img);
